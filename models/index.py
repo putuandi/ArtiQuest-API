@@ -1,0 +1,1 @@
+from models.artifacts import artifacts

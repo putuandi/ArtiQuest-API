@@ -1,0 +1,10 @@
+fastapi
+Pillow
+uvicorn
+numpy
+io
+tensorflow
+sqlalchemy
+pydantic
+fastapi[all]
+gunicorn
