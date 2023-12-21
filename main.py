@@ -6,6 +6,7 @@ from models.index import artifacts
 import tensorflow as tf
 import numpy as np
 import io
+from sqlalchemy import select
 # from fastapi.responses import JSONResponse
 # from keras.preprocessing import image
 # from io import BytesIO
@@ -41,23 +42,49 @@ async def predict_image(file: UploadFile = File(...)):
 
 
 
-# menampilkan semua data
+""" # menampilkan semua data
 @app.get('/api/allArtifacts')
 async def all_artifacts():
     data=con.execute(artifacts.select()).fetchall()
     return {
         "success": True,
         "data":data
+    } """
+    
+# menampilkan semua data
+@app.get('/api/allArtifacts')
+async def all_artifacts():
+    data=con.execute(artifacts.select())
+    result = data.fetchall()
+
+    for i, res in enumerate(result):
+        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image': res[3]}
+    print(result)
+    return {
+        "success": True,
+        "data": result
     }
     
     
 # menampilkan data berdasarkan id
-@app.get('/api/artifacts/{id}')
+""" @app.get('/api/artifacts/{id}')
 async def data_by_id(id:int):
     data=con.execute(artifacts.select().where(artifacts.c.id==id)).fetchall()
     return {
         "success": True,
         "data":data
+    } """
+
+@app.get('/api/artifacts/{id}')
+async def data_by_id(id:int):
+    data=con.execute(artifacts.select().where(artifacts.c.id==id))
+    result = data.fetchall()
+    result[0] = {'id': result[0][0], 'name': result[0][1], 'description': result[0][2], 'image': result[0][3]}
+    print(result)
+    
+    return {
+        "success": True,
+        "data": result
     }
     
     
@@ -117,10 +144,23 @@ async def delete(id:int):
         }
          
 # search data
-@app.get('/api/artifacts/{search}')
+@app.get('/api/artifacts/search/{search}')
 async def search(search):
-    data=con.execute(artifacts.select().where(artifacts.c.name.like('%'+search+'%'))).fetchall()
+    data=con.execute(artifacts.select().where(artifacts.c.name.like('%'+search+'%')))
+    result = data.fetchall()
+    
+    for i, res in enumerate(result):
+        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image': res[3]}
+    print(result)
+    
     return {
         "success": True,
-        "data":data
+        "data": result
     }
+    
+    
+    
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8080)
