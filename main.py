@@ -6,10 +6,6 @@ from models.index import artifacts
 import tensorflow as tf
 import numpy as np
 import io
-from sqlalchemy import select
-# from fastapi.responses import JSONResponse
-# from keras.preprocessing import image
-# from io import BytesIO
 
 app = FastAPI()
 
@@ -58,7 +54,7 @@ async def all_artifacts():
     result = data.fetchall()
 
     for i, res in enumerate(result):
-        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image': res[3]}
+        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image1': res[3], 'image2': res[4], 'image3': res[5],'location':res[6], 'lat': res[7], 'lon': res[8]}
     print(result)
     return {
         "success": True,
@@ -79,12 +75,12 @@ async def data_by_id(id:int):
 async def data_by_id(id:int):
     data=con.execute(artifacts.select().where(artifacts.c.id==id))
     result = data.fetchall()
-    result[0] = {'id': result[0][0], 'name': result[0][1], 'description': result[0][2], 'image': result[0][3]}
+    result[0] = {'id': result[0][0], 'name': result[0][1], 'description': result[0][2], 'image1': result[0][3], 'image2': result[0][4], 'image3': result[0][5],'location': result[0][6], 'lat': result[0][7], 'lon': result[0][8]}
     print(result)
     
     return {
         "success": True,
-        "data": result
+        "data": result[0]
     }
     
     
@@ -94,8 +90,16 @@ async def insert(artifact:Artifact):
     data=con.execute(artifacts.insert().values(
         name=artifact.name,
         description=artifact.description,
-        image=artifact.image,
+        image1=artifact.image1,
+        image2=artifact.image2,
+        image3=artifact.image3,
+        location=artifact.location,
+        lat=artifact.lat,
+        lon=artifact.lon,
     ))
+
+    # con.commit()
+    # con.close()
 
     if data.is_insert:
         return {
@@ -107,6 +111,8 @@ async def insert(artifact:Artifact):
             "success": False,
             "msg":"Some Problem"
         }
+    
+    
          
     
 # update data
@@ -115,8 +121,17 @@ async def update(id:int,artifact:Artifact):
     data=con.execute(artifacts.update().values(
         name=artifact.name,
         description=artifact.description,
-        image=artifact.image,
+        image1=artifact.image1,
+        image2=artifact.image2,
+        image3=artifact.image3,
+        location=artifact.location,
+        lat=artifact.lat,
+        lon=artifact.lon,
     ).where(artifacts.c.id==id))
+
+    # con.commit()
+    # con.close()
+
     if data:
         return {
             "success": True,
@@ -128,10 +143,16 @@ async def update(id:int,artifact:Artifact):
             "msg":"Some Problem"
         }
          
+    
+         
 # delete data
 @app.delete('/api/artifacts/{id}')
 async def delete(id:int):
     data=con.execute(artifacts.delete().where(artifacts.c.id==id))
+    
+    # con.commit()
+    # con.close()
+
     if data:
         return {
             "success": True,
@@ -143,6 +164,8 @@ async def delete(id:int):
             "msg":"Some Problem"
         }
          
+    
+         
 # search data
 @app.get('/api/artifacts/search/{search}')
 async def search(search):
@@ -150,15 +173,13 @@ async def search(search):
     result = data.fetchall()
     
     for i, res in enumerate(result):
-        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image': res[3]}
+        result[i] = {'id': res[0], 'name': res[1], 'description': res[2], 'image1': res[3], 'image2': res[4], 'image3': res[5], 'location': res[6], 'lat': res[7], 'lon': res[8]}
     print(result)
     
     return {
         "success": True,
         "data": result
     }
-    
-    
     
 
 if __name__ == "__main__":
